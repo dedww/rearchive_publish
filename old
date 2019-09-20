@@ -1,0 +1,19 @@
+   # get source list
+    for i in range(count_folders):
+        results = service.files().list(
+            pageSize=20,
+            q='"' + temp_root_folder + '"' + ' in parents and mimeType = "application/vnd.google-apps.folder"',
+            fields='nextPageToken,files(id, name)').execute()
+        items = results.get('files', [])
+        for item in items:
+            id_list.append(item['id'])
+            node = [(item['id'], item['name'], 'https://drive.google.com/drive/folders/'+item['id'])]
+            #print(node)
+            edge = [(temp_root_folder, item['id'])]
+            #print(edge)
+            c.executemany("INSERT INTO nodes VALUES(?,?,?)",
+                               node)
+            conn.commit()
+            c.executemany("INSERT INTO edges VALUES(?,?)", edge)
+            conn.commit()
+        temp_root_folder = id_list[i]
